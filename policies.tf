@@ -16,13 +16,27 @@ data "aws_iam_policy_document" "task_permissions" {
   statement {
     effect = "Allow"
 
-    resources = [
-      "${aws_cloudwatch_log_group.main.arn}",
-    ]
+    resources = compact([
+      "${var.log_group_name != "" ? "" : aws_cloudwatch_log_group.main.0.arn}:*",
+    ])
 
     actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
+    ]
+  }
+}
+
+# Task logging privileges & ssm
+data "aws_iam_policy_document" "ssm_task_permissions" {
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
     ]
   }
 }
@@ -48,7 +62,7 @@ data "aws_iam_policy_document" "task_execution_permissions" {
 }
 
 data "aws_kms_key" "secretsmanager_key" {
-  key_id = "${var.repository_credentials_kms_key}"
+  key_id = var.repository_credentials_kms_key
 }
 
 data "aws_iam_policy_document" "read_repository_credentials" {
@@ -56,8 +70,8 @@ data "aws_iam_policy_document" "read_repository_credentials" {
     effect = "Allow"
 
     resources = [
-      "${var.repository_credentials}",
-      "${data.aws_kms_key.secretsmanager_key.arn}",
+      var.repository_credentials,
+      data.aws_kms_key.secretsmanager_key.arn,
     ]
 
     actions = [
@@ -66,3 +80,23 @@ data "aws_iam_policy_document" "read_repository_credentials" {
     ]
   }
 }
+
+data "aws_kms_key" "task_container_secrets_key" {
+  key_id = var.task_container_secrets_kms_key
+}
+
+data "aws_iam_policy_document" "task_container_secrets" {
+  statement {
+    effect = "Allow"
+
+    resources = concat(
+      [data.aws_kms_key.task_container_secrets_key.arn],
+      [for i in var.task_container_secrets : replace(i["valueFrom"], "/:[^:]+::$/", "")]
+    )
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "kms:Decrypt",
+    ]
+  }
+}
+

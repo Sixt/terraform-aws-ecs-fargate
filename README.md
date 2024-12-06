@@ -1,13 +1,12 @@
 # AWS Fargate ECS Terraform Module
 
-[![Build Status](https://travis-ci.com/telia-oss/terraform-aws-ecs-fargate.svg?branch=master)](https://travis-ci.com/telia-oss/terraform-aws-ecs-fargate)
-![](https://img.shields.io/maintenance/yes/2018.svg) 
+[![workflow](https://github.com/telia-oss/terraform-aws-ecs-fargate/workflows/workflow/badge.svg)](https://github.com/telia-oss/terraform-aws-ecs-fargate/actions)
 
 Terraform module which creates Fargate ECS resources on AWS.
 
 ## Examples
 
-* [Complete AWS Fargate ECS example](https://github.com/telia-oss/terraform-aws-ecs-fargate/blob/master/examples/default/example.tf)
+* [Complete AWS Fargate ECS example](https://github.com/telia-oss/terraform-aws-ecs-fargate/blob/master/examples/basic/main.tf)
 
 ## Authors
 
